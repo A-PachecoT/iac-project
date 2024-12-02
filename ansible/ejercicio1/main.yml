@@ -1,32 +1,26 @@
-
 ---
-- name: Configurar VM
-  hosts: all
-  become: yes
-  become_method: sudo
-  remote_user: vagrant
-  tasks:
-    - name: Actualizar e instalar paquetes
-      apt:
-        update_cache: yes
-        name:
-          - git
-          - curl
-        state: present
+- name: Actualizar e instalar paquetes
+  apt:
+    update_cache: yes
+    name:
+      - git
+      - curl
+    state: present
 
-    - name: Configurar la zona horaria y locales a America/Lima
-      become: true
-      timezone:
-        name: America/Lima
-      locale_gen:
-        name: es_PE.UTF-8
-        state: present
+- name: Configurar la zona horaria
+  timezone:
+    name: America/Lima
 
-    - name: Crear un usuario y grupo
-      user:
-        name: "devuser"
-        groups: "admin"
-        append: yes
-        shell: "/bin/bash"
-        create_home: yes
-        pwdhash: "{{ 'contracifrada' | password_hash('sha512') }}"
+- name: Configurar locales
+  locale_gen:
+    name: es_PE.UTF-8
+    state: present
+
+- name: Crear un usuario y grupo
+  user:
+    name: "devuser"
+    groups: "admin"
+    append: yes
+    shell: "/bin/bash"
+    create_home: yes
+    pwdhash: "{{ 'contracifrada' | password_hash('sha512') }}"
