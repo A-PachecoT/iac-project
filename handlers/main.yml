@@ -1,5 +1,15 @@
 # Manejador para reiniciar NGINX
-- name: Reiniciar NGINX
+- name: restart nginx
   service:
     name: nginx
+    state: restarted
+
+- name: restart prometheus
+  systemd:
+    name: prometheus
+    state: restarted
+
+- name: restart flask app
+  systemd:
+    name: flask-app
     state: restarted
