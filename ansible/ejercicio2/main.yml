@@ -1,0 +1,61 @@
+---
+- name: Instalar Nginx
+  apt:
+    name: nginx
+    state: present
+    update_cache: yes
+
+- name: Crear directorio para SSL
+  file:
+    path: /etc/nginx/ssl
+    state: directory
+    mode: '0755'
+
+- name: Generar certificado SSL autofirmado
+  command: openssl req -x509 -nodes -days 365 -newkey rsa:2048 
+           -keyout /etc/nginx/ssl/nginx.key 
+           -out /etc/nginx/ssl/nginx.crt
+           -subj "/C=ES/ST=Madrid/L=Madrid/O=UNIR/CN=example.com"
+  args:
+    creates: /etc/nginx/ssl/nginx.crt
+
+- name: Configurar Nginx con SSL
+  template:
+    src: templates/nginx-ssl.conf.j2
+    dest: /etc/nginx/sites-available/default
+  notify: restart nginx
+
+- name: Habilitar sitio Nginx
+  file:
+    src: /etc/nginx/sites-available/default
+    dest: /etc/nginx/sites-enabled/default
+    state: link
+  notify: restart nginx
+
+- name: Instalar UFW
+  apt:
+    name: ufw
+    state: present
+
+- name: Permitir SSH (puerto 22)
+  ufw:
+    rule: allow
+    port: '22'
+    proto: tcp
+
+- name: Permitir HTTP (puerto 80)
+  ufw:
+    rule: allow
+    port: '80'
+    proto: tcp
+
+- name: Permitir HTTPS (puerto 443)
+  ufw:
+    rule: allow
+    port: '443'
+    proto: tcp
+
+- name: Habilitar UFW
+  ufw:
+    state: enabled
+    policy: deny 

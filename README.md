@@ -25,3 +25,31 @@ Para este ejercicio se creó el playbook [main.yml](ansible/ejercicio1/main.yml)
     https://docs.ansible.com/ansible/latest/collections/ansible/builtin/user_module.html
     https://docs.ansible.com/ansible/latest/collections/ansible/builtin/password_hash_filter.html
 
+## Ejercicio 2
+Para este ejercicio se creó el playbook [main.yml](ansible/ejercicio2/main.yml) que implementa un servidor web seguro con los siguientes componentes:
+
+- Instalación y configuración de Nginx
+    Se utiliza el módulo `apt` para instalar Nginx y se configura con SSL mediante una plantilla personalizada.
+
+- Generación de certificados SSL autofirmados
+    Se crea un directorio SSL y se generan certificados autofirmados usando OpenSSL con una validez de 365 días.
+    ```yaml
+    command: openssl req -x509 -nodes -days 365 -newkey rsa:2048 
+            -keyout /etc/nginx/ssl/nginx.key 
+            -out /etc/nginx/ssl/nginx.crt
+    ```
+
+- Configuración de Nginx con SSL
+    Se utiliza una [plantilla](templates/nginx-ssl.conf.j2) que:
+    - Redirecciona todo el tráfico HTTP a HTTPS
+    - Configura los certificados SSL
+    - Implementa protocolos seguros (TLSv1.2 y TLSv1.3)
+    - Define cifrados seguros recomendados
+
+- Configuración del firewall UFW
+    Se configura el firewall para permitir solo el tráfico necesario:
+    - SSH (puerto 22)
+    - HTTP (puerto 80)
+    - HTTPS (puerto 443)
+    La política por defecto es denegar todo el tráfico no especificado.
+

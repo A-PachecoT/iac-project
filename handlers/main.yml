@@ -1,0 +1,5 @@
+# Manejador para reiniciar NGINX
+- name: Reiniciar NGINX
+  service:
+    name: nginx
+    state: restarted
