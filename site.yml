@@ -1,0 +1,13 @@
+---
+- name: Aprovisionar VM con seguridad SSH
+  hosts: all
+  become: yes
+  become_method: sudo
+  remote_user: vagrant
+  vars:
+    ssh_public_key_path: "{{ lookup('env','HOME') }}/.ssh/dftd.pub"
+  tasks:
+    - import_tasks: tasks/authorized_keys.yml
+    - import_tasks: tasks/two_factor.yml
+  handlers:
+    - import_tasks: handlers/restart_ssh.yml

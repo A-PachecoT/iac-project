@@ -1,0 +1,43 @@
+---
+- name: Instalar libpam-google-authenticator
+  apt:
+    name: libpam-google-authenticator
+    update_cache: yes
+    state: present
+
+- name: Copiar configuración preconfigurada de Google Authenticator
+  copy:
+    src: files/google_authenticator
+    dest: /home/bender/.google_authenticator
+    mode: '0600'
+    owner: bender
+
+- name: Deshabilitar autenticación de contraseña para SSH en PAM
+  lineinfile:
+    path: "/etc/pam.d/sshd"
+    regexp: '^@include common-auth'
+    state: absent
+
+- name: Configurar PAM para usar Google Authenticator para SSH
+  lineinfile:
+    path: "/etc/pam.d/sshd"
+    line: "auth required pam_google_authenticator.so nullok"
+    insertafter: EOF
+
+- name: Establecer ChallengeResponseAuthentication a yes
+  lineinfile:
+    path: "/etc/ssh/sshd_config"
+    regexp: "^ChallengeResponseAuthentication (yes|no)"
+    line: "ChallengeResponseAuthentication yes"
+    state: present
+
+- name: Establecer métodos de autenticación para usuarios
+  blockinfile:
+    path: "/etc/ssh/sshd_config"
+    block: |
+      Match User vagrant
+        AuthenticationMethods publickey
+
+      Match User bender
+        AuthenticationMethods publickey,keyboard-interactive
+  notify: Reiniciar servidor SSH
