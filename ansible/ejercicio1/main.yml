@@ -16,6 +16,11 @@
     name: es_PE.UTF-8
     state: present
 
+- name: Instalar dependencias de Python para cifrado de contraseñas
+  apt:
+    name: python3-passlib
+    state: present
+
 - name: Crear un usuario y grupo
   user:
     name: "devuser"
@@ -23,4 +28,4 @@
     append: yes
     shell: "/bin/bash"
     create_home: yes
-    pwdhash: "{{ 'contracifrada' | password_hash('sha512') }}"
+    password: "{{ 'contracifrada' | password_hash('sha512') }}"
