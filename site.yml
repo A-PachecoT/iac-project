@@ -10,5 +10,6 @@
     - import_tasks: ansible/ejercicio3/main.yml
     - import_tasks: ansible/ejercicio4/main.yml
     - import_tasks: ansible/ejercicio6/main.yml
+    # - import_tasks: ansible/ejercicio7/main.yml
   handlers:
     - import_tasks: handlers/main.yml

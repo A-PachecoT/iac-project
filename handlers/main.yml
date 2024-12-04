@@ -17,7 +17,7 @@
     - flask-app-8001
     - flask-app-8002
 
-- name: Reiniciar servidor SSH
+- name: restart sshd
   service:
     name: sshd
     state: restarted

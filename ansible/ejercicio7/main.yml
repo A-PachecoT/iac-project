@@ -1,0 +1,50 @@
+---
+- name: Instalar dependencias de pruebas
+  apt:
+    name: 
+      - python3-pytest
+      - python3-pytest-cov
+    state: present
+    update_cache: yes
+
+- name: Instalar pytest y dependencias via pip
+  pip:
+    name:
+      - pytest
+      - pytest-flask
+      - coverage
+    state: present
+
+- name: Crear directorio de tests
+  file:
+    path: /opt/flask_app/tests
+    state: directory
+    mode: '0755'
+
+- name: Copiar archivos de prueba
+  template:
+    src: "{{ item }}"
+    dest: "/opt/flask_app/tests/{{ item | regex_replace('\\.j2$', '') }}"
+    mode: '0644'
+  loop:
+    - "test_app.py.j2"
+    - "conftest.py.j2"
+
+- name: Ejecutar pruebas
+  command: 
+    cmd: python3 -m pytest tests/ -v
+    chdir: /opt/flask_app
+  register: test_results
+  ignore_errors: yes
+
+- name: Guardar resultados de pruebas
+  copy:
+    content: "{{ test_results.stdout }}"
+    dest: /var/log/pytest_results.log
+    mode: '0644'
+  when: test_results is defined
+
+- name: Verificar resultados
+  fail:
+    msg: "Las pruebas fallaron. Revisar /var/log/pytest_results.log"
+  when: test_results.rc != 0 

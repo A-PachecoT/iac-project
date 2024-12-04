@@ -140,3 +140,24 @@ Para este ejercicio se creó el playbook [main.yml](ansible/ejercicio6/main.yml)
 - Auditoría automatizada con Lynis que genera reportes detallados
 
 ![alt text](images/image-4.png)
+
+## Ejercicio 7
+Para este ejercicio se creó el playbook [main.yml](ansible/ejercicio7/main.yml) que implementa pruebas automatizadas:
+
+- Instalación del entorno de pruebas
+    - pytest y sus dependencias
+    - pytest-flask para pruebas de la aplicación web
+    - coverage para análisis de cobertura
+
+- Implementación de pruebas unitarias
+    Se crearon dos archivos de prueba:
+    - test_app.py: pruebas de la aplicación Flask
+    - conftest.py: configuración y fixtures de pytest
+
+- Ejecución y verificación
+    - Las pruebas se ejecutan automáticamente
+    - Los resultados se guardan en /var/log/pytest_results.log
+    - El playbook falla si las pruebas no pasan
+
+Tuve problemas con este ejercicio a la hora de copiar los archivos python. Si bien implementé varios métodos para solucionar el problema, no pude lograrlo.
+![alt text](images/image-5.png)
