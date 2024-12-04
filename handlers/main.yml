@@ -11,5 +11,13 @@
 
 - name: restart flask app
   systemd:
-    name: flask-app
+    name: "{{ item }}"
+    state: restarted
+  with_items:
+    - flask-app-8001
+    - flask-app-8002
+
+- name: Reiniciar servidor SSH
+  service:
+    name: sshd
     state: restarted
