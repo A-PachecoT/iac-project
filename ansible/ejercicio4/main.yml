@@ -1,0 +1,53 @@
+---
+- name: Instalar Prometheus y Node Exporter
+  apt:
+    name: 
+      - prometheus
+      - prometheus-node-exporter
+    state: present
+    update_cache: yes
+
+- name: Crear directorio de configuración de Prometheus
+  file:
+    path: /etc/prometheus
+    state: directory
+    mode: '0755'
+
+- name: Configurar Prometheus
+  template:
+    src: prometheus.yml.j2
+    dest: /etc/prometheus/prometheus.yml
+  notify: restart prometheus
+
+- name: Agregar clave GPG de Grafana
+  apt_key:
+    url: https://packages.grafana.com/gpg.key
+    state: present
+
+- name: Agregar repositorio de Grafana
+  apt_repository:
+    repo: "deb https://packages.grafana.com/oss/deb stable main"
+    state: present
+    filename: grafana
+
+- name: Actualizar caché de apt
+  apt:
+    update_cache: yes
+
+- name: Instalar Grafana
+  apt:
+    name: grafana
+    state: present
+
+- name: Habilitar y iniciar Grafana
+  systemd:
+    name: grafana-server
+    state: started
+    enabled: yes
+
+- name: Instalar dependencias de Python para métricas
+  pip:
+    name:
+      - prometheus_client
+    state: present
+  notify: restart flask app

@@ -1,1 +1,62 @@
- 
+---
+- name: Instalar dependencias de Python
+  apt:
+    name: 
+      - python3
+      - python3-pip
+      - python3-venv
+    state: present
+    update_cache: yes
+
+- name: Instalar Flask y Gunicorn
+  pip:
+    name:
+      - flask
+      - gunicorn
+    state: present
+
+- name: Crear directorio para la aplicación Flask
+  file:
+    path: /opt/flask_app
+    state: directory
+    mode: '0755'
+
+- name: Copiar aplicación Flask
+  template:
+    src: templates/app.py.j2
+    dest: /opt/flask_app/app.py
+    mode: '0644'
+
+# Crear servicios systemd para las instancias
+- name: Crear servicio Flask - Puerto 8001
+  template:
+    src: templates/flask-app.service.j2
+    dest: /etc/systemd/system/flask-app-8001.service
+    mode: '0644'
+  vars:
+    port: 8001
+
+- name: Crear servicio Flask - Puerto 8002
+  template:
+    src: templates/flask-app.service.j2
+    dest: /etc/systemd/system/flask-app-8002.service
+    mode: '0644'
+  vars:
+    port: 8002
+
+- name: Iniciar y habilitar servicios Flask
+  systemd:
+    name: "{{ item }}"
+    state: started
+    enabled: yes
+    daemon_reload: yes
+  with_items:
+    - flask-app-8001
+    - flask-app-8002
+
+- name: Configurar Nginx para balanceo de carga
+  template:
+    src: templates/nginx-lb.conf.j2
+    dest: /etc/nginx/sites-available/default
+    mode: '0644'
+  notify: restart nginx 

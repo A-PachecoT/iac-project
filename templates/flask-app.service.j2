@@ -1,0 +1,15 @@
+[Unit]
+Description=Aplicación Flask en puerto {{ port }}
+After=network.target
+
+[Service]
+User=www-data
+WorkingDirectory=/opt/flask_app
+Environment="PATH=/usr/local/bin"
+Environment="PROMETHEUS_MULTIPROC_DIR=/tmp/prometheus-multiproc"
+ExecStartPre=mkdir -p /tmp/prometheus-multiproc
+ExecStartPre=chown -R www-data:www-data /tmp/prometheus-multiproc
+ExecStart=/usr/local/bin/gunicorn --workers=2 --bind=127.0.0.1:{{ port }} --worker-class=gthread app:app
+
+[Install]
+WantedBy=multi-user.target 

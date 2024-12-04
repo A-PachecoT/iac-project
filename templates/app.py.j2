@@ -1,1 +1,32 @@
- 
+from flask import Flask, Response, request
+from prometheus_client import Counter, generate_latest, CONTENT_TYPE_LATEST, multiprocess, CollectorRegistry
+
+app = Flask(__name__)
+
+# Configuración para métricas con múltiples workers
+registry = CollectorRegistry()
+multiprocess.MultiProcessCollector(registry)
+
+# Definir métricas
+request_count = Counter('flask_request_count', 'Total number of requests', registry=registry)
+error_count = Counter('flask_error_count', 'Total number of errors', registry=registry)
+
+@app.before_request
+def before_request():
+    request_count.inc()
+
+@app.route('/')
+def hello():
+    return 'Hello, World!'
+
+@app.route('/metrics')
+def metrics():
+    return Response(generate_latest(registry), mimetype=CONTENT_TYPE_LATEST)
+
+@app.errorhandler(Exception)
+def handle_error(error):
+    error_count.inc()
+    return 'Error occurred', 500
+
+if __name__ == '__main__':
+    app.run(host='0.0.0.0') 
