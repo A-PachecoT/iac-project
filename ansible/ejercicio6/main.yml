@@ -1,0 +1,67 @@
+---
+- name: Instalar Lynis
+  apt:
+    name: lynis
+    state: present
+    update_cache: yes
+
+- name: Instalar AppArmor
+  apt:
+    name: 
+      - apparmor
+      - apparmor-utils
+      - apparmor-profiles
+    state: present
+
+- name: Habilitar y arrancar AppArmor
+  systemd:
+    name: apparmor
+    state: started
+    enabled: yes
+
+- name: Asegurar permisos de archivos críticos
+  file:
+    path: "{{ item }}"
+    mode: '0600'
+    owner: root
+    group: root
+  with_items:
+    - /etc/passwd
+    - /etc/shadow
+    - /etc/group
+    - /etc/gshadow
+
+- name: Configurar política de contraseñas
+  lineinfile:
+    path: /etc/login.defs
+    regexp: "{{ item.regexp }}"
+    line: "{{ item.line }}"
+  with_items:
+    - { regexp: '^PASS_MAX_DAYS', line: 'PASS_MAX_DAYS   90' }
+    - { regexp: '^PASS_MIN_DAYS', line: 'PASS_MIN_DAYS   7' }
+    - { regexp: '^PASS_WARN_AGE', line: 'PASS_WARN_AGE   14' }
+
+- name: Endurecer configuración SSH
+  lineinfile:
+    path: /etc/ssh/sshd_config
+    regexp: "{{ item.regexp }}"
+    line: "{{ item.line }}"
+  with_items:
+    - { regexp: '^PermitRootLogin', line: 'PermitRootLogin no' }
+    - { regexp: '^PasswordAuthentication', line: 'PasswordAuthentication no' }
+    - { regexp: '^X11Forwarding', line: 'X11Forwarding no' }
+    - { regexp: '^MaxAuthTries', line: 'MaxAuthTries 3' }
+  notify: restart sshd
+
+- name: Ejecutar escaneo de seguridad y guardar reporte
+  shell: |
+    lynis audit system > /var/log/security_audit.log 2>&1
+  args:
+    creates: /var/log/security_audit.log
+
+- name: Asegurar permisos del reporte
+  file:
+    path: /var/log/security_audit.log
+    mode: '0600'
+    owner: root
+    group: root

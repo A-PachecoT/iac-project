@@ -129,3 +129,14 @@ Las métricas pueden visualizarse en:
 
 ![alt text](images/image-3.png)
 
+## Ejercicio 6
+Para este ejercicio se creó el playbook [main.yml](ansible/ejercicio6/main.yml) que implementa medidas de seguridad y auditoría:
+
+- Instalación y configuración de herramientas de seguridad (Lynis y AppArmor)
+- Endurecimiento del sistema mediante:
+  - Permisos restrictivos en archivos críticos
+  - Política de contraseñas robusta
+  - Configuración segura de SSH
+- Auditoría automatizada con Lynis que genera reportes detallados
+
+![alt text](images/image-4.png)
